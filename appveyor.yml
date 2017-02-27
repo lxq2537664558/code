@@ -54,13 +54,13 @@ artifacts:
 
 deploy:
     # push our nightly bundle via ftp
- # - provider: FTP
- #   protocol: ftp
- #   host: inexor.org
- #   username:
- #     secure: rpQyxcVaaqNxDvYQlGP/eA==
- #   password:
- #     secure: aBNw6S6n1MqCfw/0S2vhDA==
+  - provider: FTP
+    protocol: ftp
+    host: nightly.inexor.org
+    username:
+      secure: rpQyxcVaaqNxDvYQlGP/eA==
+    password:
+      secure: aBNw6S6n1MqCfw/0S2vhDA==
     # push release binaries to GitHub if tag gets created (and create a release draft)
   - provider: GitHub
     auth_token:
