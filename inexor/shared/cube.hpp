@@ -31,7 +31,13 @@
 /// SDL (Simple DirectMedia Layer) - General Rendering/sound/events/threads
 #ifndef STANDALONE
   #include <SDL.h>
-  #include <SDL_opengl.h>
+  #ifdef __APPLE__
+    #include <OpenGL/gl.h>
+    #include <GLUT/glut.h>
+    #include <OpenGL/glext.h>
+  #else
+    #include <SDL_opengl.h>
+  #endif
 #endif
 
 /// ENET: reliable UDP networking library
@@ -56,4 +62,3 @@
 
 
 #endif // __CUBE_H__
-
