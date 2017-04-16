@@ -1595,7 +1595,7 @@ namespace server
 
     void flushclientposition(clientinfo &ci)
     {
-        if(ci.position.empty() || (!hasnonlocalclients() && !demorecord)) return;
+        if(ci.position.empty() || (!has_clients() && !demorecord)) return;
         packetbuf p(ci.position.length(), 0);
         p.put(ci.position.getbuf(), ci.position.length());
         ci.position.setsize(0);
@@ -1719,7 +1719,7 @@ namespace server
 
     bool sendpackets(bool force)
     {
-        if(clients.empty() || (!hasnonlocalclients() && !demorecord)) return false;
+        if(clients.empty() || (!has_clients() && !demorecord)) return false;
         enet_uint32 curtime = enet_time_get()-lastsend;
         if(curtime<33 && !force) return false;
         bool flush = buildworldstate();
@@ -1999,8 +1999,6 @@ namespace server
             ci->state.timeplayed += lastmillis - ci->state.lasttimeplayed;
         }
 
-        if(!m_mp(gamemode)) kicknonlocalclients(DISC_LOCAL);
-
         sendf(-1, 1, "risii", N_MAPCHANGE, smapname, gamemode, 1);
 
         clearteaminfo();
@@ -2127,7 +2125,7 @@ namespace server
             if(idx < 0) return;
             map = maprotations[idx].map;
         }
-        if(hasnonlocalclients()) sendservmsgf("local player forced %s on map %s", modename(mode), map[0] ? map : "[new map]");
+        if(has_clients()) sendservmsgf("local player forced %s on map %s", modename(mode), map[0] ? map : "[new map]");
         changemap(map, mode);
     }
 
@@ -2153,7 +2151,7 @@ namespace server
         if(ci->local || (ci->privilege && mastermode>=MM_VETO))
         {
             if(demorecord) enddemorecord();
-            if(!ci->local || hasnonlocalclients())
+            if(!ci->local || has_clients())
                 sendservmsgf("%s forced %s on map %s", colorname(ci), modename(ci->modevote), ci->mapvote[0] ? ci->mapvote : "[new map]");
             changemap(ci->mapvote, ci->modevote);
         }
@@ -2861,9 +2859,9 @@ namespace server
 
         if(p.packet->flags&ENET_PACKET_FLAG_RELIABLE) reliablemessages = true;
         #define QUEUE_AI clientinfo *cm = cq;
-        #define QUEUE_MSG { if(cm && (!cm->local || demorecord || hasnonlocalclients())) while(curmsg<p.length()) cm->messages.add(p.buf[curmsg++]); }
+        #define QUEUE_MSG { if(cm && (!cm->local || demorecord || has_clients())) while(curmsg<p.length()) cm->messages.add(p.buf[curmsg++]); }
         #define QUEUE_BUF(body) { \
-            if(cm && (!cm->local || demorecord || hasnonlocalclients())) \
+            if(cm && (!cm->local || demorecord || has_clients())) \
             { \
                 curmsg = p.length(); \
                 { body; } \
@@ -2899,7 +2897,7 @@ namespace server
                 }
                 if(cp)
                 {
-                    if((!ci->local || demorecord || hasnonlocalclients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
+                    if((!ci->local || demorecord || has_clients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
                     {
                         if(!ci->local && !m_edit && max(vel.magnitude2(), (float)fabs(vel.z)) >= 180)
                             cp->setexceeded();
@@ -2918,7 +2916,7 @@ namespace server
                 int pcn = getint(p), teleport = getint(p), teledest = getint(p);
                 clientinfo *cp = getinfo(pcn);
                 if(cp && pcn != sender && cp->ownernum != sender) cp = NULL;
-                if(cp && (!ci->local || demorecord || hasnonlocalclients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
+                if(cp && (!ci->local || demorecord || has_clients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
                 {
                     flushclientposition(*cp);
                     sendf(-1, 0, "ri4x", N_TELEPORT, pcn, teleport, teledest, cp->ownernum); 
@@ -2931,7 +2929,7 @@ namespace server
                 int pcn = getint(p), jumppad = getint(p);
                 clientinfo *cp = getinfo(pcn);
                 if(cp && pcn != sender && cp->ownernum != sender) cp = NULL;
-                if(cp && (!ci->local || demorecord || hasnonlocalclients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
+                if(cp && (!ci->local || demorecord || has_clients()) && (cp->state.state==CS_ALIVE || cp->state.state==CS_EDITING))
                 {
                     cp->setpushed();
                     flushclientposition(*cp);
@@ -3134,8 +3132,7 @@ namespace server
                 getstring(text, p);
                 filtertext(text, text, true, true);
                 QUEUE_STR(text);
-                if(isdedicatedserver() && cq)
-                    spdlog::get("global")->info("{0}: {1}", colorname(cq), text);
+                if(cq) spdlog::get("global")->info("{0}: {1}", colorname(cq), text);
                 break;
             }
 
@@ -3150,8 +3147,7 @@ namespace server
                     if(t==cq || t->state.state==CS_SPECTATOR || t->state.aitype != AI_NONE || strcmp(cq->team, t->team)) continue;
                     sendf(t->clientnum, 1, "riis", N_SAYTEAM, cq->clientnum, text);
                 }
-                if(isdedicatedserver() && cq)
-                    spdlog::get("global")->info("{0}<{1}>: {2}", colorname(cq), cq->team, text);
+                if(cq) spdlog::get("global")->info("{0}<{1}>: {2}", colorname(cq), cq->team, text);
                 break;
             }
             case N_PRIVMSG:
@@ -3358,7 +3354,7 @@ namespace server
             }
 
             case N_FORCEINTERMISSION:
-                if(ci->local && !hasnonlocalclients()) startintermission();
+                if(ci->local && !has_clients()) startintermission();
                 break;
 
             case N_RECORDDEMO:

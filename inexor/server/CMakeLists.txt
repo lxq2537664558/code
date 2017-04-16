@@ -4,10 +4,14 @@ prepend(SERVER_SOURCES_ENGINE ${SOURCE_DIR}/engine
 prepend(SERVER_SOURCES_FPSGAME ${SOURCE_DIR}/fpsgame
     server.cpp entities.cpp)
 
+prepend(SERVER_SOURCES_SERVER ${SOURCE_DIR}/server
+    main.cpp)
+
 set(SERVER_SOURCES
   ${SHARED_MODULE_SOURCES}
   ${SERVER_SOURCES_FPSGAME}
   ${SERVER_SOURCES_ENGINE}
+  ${SERVER_SOURCES_SERVER}
   CACHE INTERNAL "")
 
 # Set Binary name

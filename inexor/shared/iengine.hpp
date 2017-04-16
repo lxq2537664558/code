@@ -447,13 +447,10 @@ extern uint getclientip(int n);
 extern void localconnect();
 extern const char *disconnectreason(int reason);
 extern void disconnect_client(int n, int reason);
-extern void kicknonlocalclients(int reason = DISC_NONE);
-extern bool hasnonlocalclients();
-extern bool haslocalclients();
+extern bool has_clients();
 extern void sendserverinforeply(ucharbuf &p);
 extern bool requestmaster(const char *req);
 extern bool requestmasterf(const char *fmt, ...) PRINTFARGS(1, 2);
-extern bool isdedicatedserver();
 
 // client
 extern void sendclientpacket(ENetPacket *packet, int chan);
