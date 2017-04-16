@@ -1,13 +1,8 @@
 /// @file game.h
-/// definitions of network protocol, game modes, entities, guns, monsters, mastermode
-/// pickups, triggers, team scores, armour, permission levels, 
-///
-///
-///
+/// definitions of game modes, entities, guns, monsters, mastermode
+/// pickups, triggers, team scores, armour, permission levels
 
-/// include guard protectes this file from being included twice
-#ifndef __GAME_H__
-#define __GAME_H__
+#pragma once
 
 #include "inexor/shared/cube.hpp"
 #include "inexor/util/Logging.hpp"
@@ -47,14 +42,13 @@ enum
     MAPSOUND = ET_SOUND,        /// sounds
     SPOTLIGHT = ET_SPOTLIGHT,   /// cone-shaped spotlights
 
-    /// prefix I_ stands for "Inexor"...
     I_SHELLS, I_BULLETS, I_ROCKETS, I_ROUNDS, I_GRENADES, I_CARTRIDGES, /// ammo pickups
     I_BOMBS = ET_BOMBS,         /// bomberman game mode
     I_BOMBRADIUS,               /// bomb radius (see bomberman game mode)
     I_BOMBDELAY,                /// bomberman game mode
-	I_HEALTH, I_BOOST,          /// bomberman game mode
-    I_GREENARMOUR, I_YELLOWARMOUR, /// bomberman game mode
-    I_QUAD,                     /// bomberman game mode
+    I_HEALTH, I_BOOST,
+    I_GREENARMOUR, I_YELLOWARMOUR,
+    I_QUAD,
 
     TELEPORT,                   /// attr1 = idx, attr2 = model, attr3 = tag
     TELEDEST,                   /// attr1 = z-angle, attr2 = idx
@@ -93,50 +87,41 @@ struct fpsentity : extentity
 };
 
 /// static gun and projectile enumeration
-/// TODO: replace this hardcoded stuff and move on to JSON!
 enum 
 {
-	GUN_FIST = 0,	/// fist
-	GUN_SG,			/// shotgun
-	GUN_CG,			/// 
-	GUN_RL,			/// rocket launcher
-	GUN_RIFLE,		/// rifle
-	GUN_GL,			/// grenade launcher
-	GUN_PISTOL,		/// pistol
-	GUN_BOMB,		/// BOMBERMAN gamemode: bomb
-	GUN_FIREBALL,	/// monster/bot: fireball
-	GUN_ICEBALL,	/// monster/bot: iceball
-	GUN_SLIMEBALL,	/// monster/bot: slimeball
-	GUN_BITE,		/// bite
-	GUN_BARREL,		/// barrel damage
-	GUN_SPLINTER,	/// splinter
-	NUMGUNS         /// 
+    GUN_FIST = 0,   /// fist
+    GUN_SG,         /// shotgun
+    GUN_CG,         /// chain gun
+    GUN_RL,         /// rocket launcher
+    GUN_RIFLE,      /// rifle
+    GUN_GL,         /// grenade launcher
+    GUN_PISTOL,     /// pistol
+    GUN_BOMB,       /// BOMBERMAN gamemode: bomb
+    GUN_FIREBALL,   /// monster/bot: fireball
+    GUN_ICEBALL,    /// monster/bot: iceball
+    GUN_SLIMEBALL,  /// monster/bot: slimeball
+    GUN_BITE,       /// bite
+    GUN_BARREL,     /// barrel damage
+    GUN_SPLINTER,   /// splinter
+    NUMGUNS
 };
 
 
 /// armour type enumeration... take 20/40/60 % off
+enum { A_BLUE, A_GREEN, A_YELLOW };
+
 enum 
 {
-	A_BLUE,
-	A_GREEN,
-	A_YELLOW
+    M_NONE = 0,
+    M_SEARCH,
+    M_HOME,
+    M_ATTACKING,
+    M_PAIN,
+    M_SLEEP,
+    M_AIMING
 };
 
-/// Artificial intelligence: BOT states
-/// "Artificial intelligence is the perpetuum mobile of computer science"
-enum 
-{ 
-	M_NONE = 0,
-	M_SEARCH,
-	M_HOME,
-	M_ATTACKING,
-	M_PAIN,
-	M_SLEEP,
-	M_AIMING
-};  
 
-
-/// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 /// game mode specific code
 
 /// basic game mode bitmask "FLAGS"
@@ -145,7 +130,7 @@ enum
 {
     M_TEAM       = 1<<0,   /// game mode contains teams
     M_NOITEMS    = 1<<1,   /// game mode has no items
-    M_NOAMMO     = 1<<2,   /// game mode has no ammo?
+    M_NOAMMO     = 1<<2,   /// game mode has no ammo items
     M_INSTA      = 1<<3,   /// game mode has an instagib modifier
     M_EFFICIENCY = 1<<4,   /// game mode has an efficiency modifier
     M_TACTICS    = 1<<5,   /// game mode offers random spawn weapons (see tactics mode)
@@ -164,8 +149,8 @@ enum
     M_SLOWMO     = 1<<18,  /// game mode is played in slow motion
     M_COLLECT    = 1<<19,  /// game mode is about collecting skulls
 
-    M_LMS        = 1<<20,  /// 
-    M_BOMB       = 1<<21,  /// 
+    M_LMS        = 1<<20,  /// last man standing
+    M_BOMB       = 1<<21,  /// bomberman
     M_TIMEFORWARD= 1<<22,  ///
     M_OBSTACLES  = 1<<23,  ///
     M_HIDEANDSEEK= 1<<24,  /// 
@@ -266,35 +251,23 @@ static struct gamemodeinfo
 #define m_dmsp         (m_check(gamemode, M_DMSP))
 #define m_classicsp    (m_check(gamemode, M_CLASSICSP))
 
-
-/// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/// master server list handling
-
-/// master mode status enumeration
-/// TODO: replace this hardcoded stuff and move on to JSON!
+/// master mode states: server rights managment
 enum 
-{ 
-	MM_AUTH = -1,
-	MM_OPEN = 0,
-	MM_VETO,
-	MM_LOCKED, 
-	MM_PRIVATE, 
-	MM_PASSWORD, 
-	MM_START = MM_AUTH
+{
+    MM_START = -1,
+    MM_OPEN = 0,   // anyone can claim master
+    MM_VETO,       // anyone can vote for maps and join
+    MM_LOCKED,     // newly joined players start in spectator mode
+    MM_PRIVATE,
+    MM_PASSWORD,
 };
 
-
 /// static strings for server description in master server list
-/// TODO: replace this hardcoded stuff and move on to JSON!
 static const char * const mastermodenames[] =  { "auth",   "open",   "veto",       "locked",     "private",    "password" };
 static const char * const mastermodecolors[] = { "",    COL_GREEN,  COL_YELLOW,   COL_YELLOW,     COL_RED,    COL_RED};
 static const char * const mastermodeicons[] =  { "server", "server", "serverlock", "serverlock", "serverpriv", "serverpriv" };
 
-
-/// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/// sound list and description of administrative levels
-
-/// hardcoded sounds, defined in sounds.cfg
+/// hardcoded sound slots, mapped to soundfiles in sounds.cfg
 enum
 {
     S_JUMP = 0, S_LAND, S_RIFLE, S_PUNCH1, S_SG, S_CG,
@@ -1023,16 +996,16 @@ namespace game
     extern void hitmovable(int damage, movable *m, fpsent *at, const vec &vel, int gun);
     extern bool isobstaclealive(movable *m);
 
-    // weapon
-    enum 
-	{ 
-		BNC_GRENADE, 
-		BNC_BOMB, 
-		BNC_SPLINTER, 
-		BNC_GIBS, 
-		BNC_DEBRIS, 
-		BNC_BARRELDEBRIS
-	};
+    // projectile bouncer types
+    enum
+    {
+        BNC_GRENADE,
+        BNC_BOMB,
+        BNC_SPLINTER,
+        BNC_GIBS,
+        BNC_DEBRIS,
+        BNC_BARRELDEBRIS
+    };
 
     struct projectile
     {
@@ -1120,9 +1093,6 @@ namespace game
     extern vec hudgunorigin(int gun, const vec &from, const vec &to, fpsent *d);
 }
 
-/// ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-/// (local) dedicated server handling
-
 namespace server
 {
     extern const char *modename(int n, const char *unknown = "unknown");
@@ -1139,6 +1109,4 @@ namespace server
     extern bool serveroption(const char *arg);
     extern bool delayspawn(int type);
 }
-
-#endif /// __GAME_H__
 

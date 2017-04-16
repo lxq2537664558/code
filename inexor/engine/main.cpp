@@ -958,8 +958,6 @@ int main(int argc, char **argv)
     concatstring(gamecfgname, game::gameident());
     concatstring(gamecfgname, ".cfg");
     execfile(gamecfgname);
-    
-    game::loadconfigs();
 
     identflags |= IDF_PERSIST;
 
