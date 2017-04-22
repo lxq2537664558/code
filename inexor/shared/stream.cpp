@@ -339,9 +339,6 @@ int listfiles(const char *dir, const char *ext, vector<char *> &files)
         formatstring(s, "%s%s", pf.dir, dirname);
         if(listdir(s, false, ext, files)) dirs++;
     }
-#ifndef STANDALONE
-    dirs += listzipfiles(dirname, ext, files);
-#endif
     return dirs;
 }
 
@@ -986,10 +983,6 @@ stream *openrawfile(const char *filename, const char *mode)
 
 stream *openfile(const char *filename, const char *mode)
 {
-#ifndef STANDALONE
-    stream *s = openzipfile(filename, mode);
-    if(s) return s;
-#endif
     return openrawfile(filename, mode);
 }
 
